@@ -36,9 +36,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=4000
 
-# Dependencias runtime para TensorFlow
+# Dependencias runtime: TensorFlow + OpenCV (inference_sdk/cv2 requiere libGL)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
+    libgl1-mesa-glx \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar paquetes Python desde builder
