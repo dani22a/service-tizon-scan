@@ -15,9 +15,11 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+# App a nivel de módulo para gunicorn
+app = create_app()
+
 if __name__ == "__main__":
     try:
-        app =  create_app()
         uvicorn.run(app, port=config.PORT, log_level="info")
     except Exception as e:
         logging.error(e)
