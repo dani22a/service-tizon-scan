@@ -1,7 +1,7 @@
 # ============================================
 # Stage 1: Builder - dependencias
 # ============================================
-FROM python:3.11-slim-bookworm AS builder
+FROM python:3.11-bookworm AS builder
 
 WORKDIR /app
 
@@ -11,19 +11,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Instalar dependencias del sistema necesarias para TensorFlow
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copiar e instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 # ============================================
-# Stage 2: Runtime - imagen final
+# Stage 2: Runtime - imagen final (bookworm completo para OpenCV/inference_sdk)
 # ============================================
-FROM python:3.11-slim-bookworm AS runtime
+FROM python:3.11-bookworm AS runtime
 
 WORKDIR /app
 
@@ -36,11 +31,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=4000
 
-# Dependencias runtime: TensorFlow + OpenCV (inference_sdk/cv2)
+# Dependencias mínimas (bookworm completo ya incluye libGL, libglib, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar paquetes Python desde builder
