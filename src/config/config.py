@@ -7,6 +7,7 @@ class Config(BaseSettings):
   DOMAIN: str
   ENV: Literal["development", "production"]
   NAME_COOKIE: str
+  CORS_ORIGINS: str = "http://localhost:3000"  # Orígenes separados por coma
   ROBOFLOW_API_URL: str = "https://serverless.roboflow.com"
   ROBOFLOW_API_KEY: str | None = None
   ROBOFLOW_MODEL_ID: str | None = None
