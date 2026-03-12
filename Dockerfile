@@ -31,9 +31,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=4000
 
-# Dependencias mínimas (bookworm completo ya incluye libGL, libglib, etc.)
+# Dependencias para OpenCV/cv2 (inference_sdk): libGL, libglib, etc.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar paquetes Python desde builder
