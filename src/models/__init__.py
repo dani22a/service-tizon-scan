@@ -7,6 +7,7 @@ from src.models.diagnosis import DiagnosisReport, DiagnosisRecommendation
 from src.models.periodo import Periodo
 from src.models.periodo_recommendation import PeriodoReport, PeriodoRecommendation
 from src.models.prediction_recommendation import PrediccionRecommendation
+from src.models.video_analisis import VideoAnalisis
 from src.models.spatial_recommendation import (
     SurcoReport,
     SurcoRecommendation,
@@ -28,6 +29,7 @@ __all__ = [
     "PeriodoReport",
     "PeriodoRecommendation",
     "PrediccionRecommendation",
+    "VideoAnalisis",
     "SurcoReport",
     "SurcoRecommendation",
     "LoteReport",

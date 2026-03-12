@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 from src.services.video_service import (
     create_video_analisis,
     list_video_analisis_by_user,
-    list_video_analisis_by_periodo,
 )
 from src.helpers.response import success_response
 
@@ -22,7 +21,7 @@ class VideoAnalisisCreate(BaseModel):
     analysis_payload: dict = Field(..., description="Resultado completo del análisis con Gemini")
 
 
-@router.post("/videos", status_code=201)
+@router.post("", status_code=201)
 async def create_video(
     request: Request,
     payload: VideoAnalisisCreate = Body(...),
@@ -47,7 +46,7 @@ async def create_video(
     )
 
 
-@router.get("/videos/history", status_code=200)
+@router.get("/history", status_code=200)
 async def get_video_history(request: Request):
     """Historial de análisis de videos del usuario."""
     user_id = _get_user_id(request)
@@ -55,13 +54,3 @@ async def get_video_history(request: Request):
     return success_response(videos, "Historial de videos", 200)
 
 
-@router.get("/periodos/{periodo_id}/videos", status_code=200)
-async def get_videos_by_periodo(request: Request, periodo_id: int):
-    """Videos analizados en un periodo (campaña) específico."""
-    user_id = _get_user_id(request)
-    from src.models.periodo import Periodo
-    periodo = await Periodo.filter(id=periodo_id, usuario_id=user_id).first()
-    if not periodo:
-        raise HTTPException(status_code=404, detail="Periodo no encontrado")
-    videos = await list_video_analisis_by_periodo(periodo_id)
-    return success_response(videos, "Videos del periodo", 200)

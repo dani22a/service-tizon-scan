@@ -4,6 +4,7 @@ from datetime import date
 
 from src.services import periodo_service
 from src.services import periodo_recommendation_service
+from src.services.video_service import list_video_analisis_by_periodo
 from src.helpers.response import success_response
 
 router = APIRouter()
@@ -83,6 +84,18 @@ async def create_periodo_diagnosis(
         payload=payload,
     )
     return success_response(report, "Diagnóstico de periodo guardado", 201)
+
+
+@router.get("/periodos/{periodo_id}/videos", status_code=200)
+async def get_videos_by_periodo(request: Request, periodo_id: int):
+    """Videos analizados en un periodo (campaña) específico."""
+    from src.models.periodo import Periodo
+    user_id = _get_user_id(request)
+    periodo = await Periodo.filter(id=periodo_id, usuario_id=user_id).first()
+    if not periodo:
+        raise HTTPException(status_code=404, detail="Periodo no encontrado")
+    videos = await list_video_analisis_by_periodo(periodo_id)
+    return success_response(videos, "Videos del periodo", 200)
 
 
 @router.get("/periodos/{periodo_id}/diagnosis", status_code=200)
