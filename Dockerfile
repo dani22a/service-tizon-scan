@@ -57,4 +57,5 @@ USER appuser
 EXPOSE 4000
 
 # Gunicorn con workers uvicorn para producción
-CMD ["sh", "-c", "gunicorn main:app -w ${WORKERS:-2} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT} --timeout 120 --graceful-timeout 30"]
+# --worker-tmp-dir /dev/shm evita "Permission denied" del control server en Docker
+CMD ["sh", "-c", "gunicorn main:app -w ${WORKERS:-2} -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT} --timeout 120 --graceful-timeout 30 --worker-tmp-dir /dev/shm"]
