@@ -205,6 +205,11 @@ async def evaluar_y_guardar_prediccion(
     fase1_payload = await roboflow_inference_service(image_bytes=image_bytes, image_url=image_url)
 
     if image_bytes:
+        if classifier is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Modelos de clasificación no disponibles. Configure la carpeta model/ con los archivos .keras.",
+            )
         fase2_payload = classifier.predict_bytes(image_bytes)
         resolved_image_url = f"uploaded://{filename or 'image'}"
     else:

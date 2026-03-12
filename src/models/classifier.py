@@ -46,6 +46,8 @@ class PotatoDiseaseClassifier:
 
         self.models = {}
         for name, config in MODEL_REGISTRY.items():
+            if not config["path"].exists():
+                raise FileNotFoundError(f"Modelo no encontrado: {config['path']}")
             self.models[name] = {
                 "model": load_model(config["path"]),
                 "preprocess": config["preprocess"],
@@ -116,4 +118,14 @@ class PotatoDiseaseClassifier:
         return results
 
 
-classifier = PotatoDiseaseClassifier()
+def _create_classifier():
+    """Crea el classifier solo si los modelos existen. Retorna None si no."""
+    try:
+        if not JSON_PATH.exists():
+            return None
+        return PotatoDiseaseClassifier()
+    except (FileNotFoundError, ValueError, OSError):
+        return None
+
+
+classifier = _create_classifier()

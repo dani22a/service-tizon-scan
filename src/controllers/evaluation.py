@@ -80,6 +80,12 @@ async def evaluate(
 
   user_id = _get_user_id(request)
 
+  if classifier is None:
+    raise HTTPException(
+      status_code=503,
+      detail="Modelos de clasificación no disponibles. Configure la carpeta model/ con los archivos .keras.",
+    )
+
   img_bytes = await file.read()
   result = classifier.predict_all_models_bytes(img_bytes)
 
