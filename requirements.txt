@@ -1,0 +1,31 @@
+# API y servidor
+fastapi>=0.100
+uvicorn>=0.20
+python-multipart>=0.0.6
+
+# Base de datos
+tortoise-orm>=1.1
+asyncpg>=0.28
+tzdata>=2024.1  # Zonas horarias IANA (requerido en Windows para zoneinfo)
+
+# Autenticación
+bcrypt>=5.0
+PyJWT>=2.8
+python-dotenv>=1.0
+
+# Validación y configuración
+pydantic>=2.0
+pydantic-settings>=2.0
+email-validator>=2.0
+
+# Roboflow (cliente HTTP)
+inference-sdk>=1.0
+
+# Clasificador de papa (Keras + TensorFlow)
+keras>=3.0
+tensorflow>=2.15
+numpy>=1.24,<2.4
+pillow>=10.0
+
+# Tests
+pytest>=8.0
