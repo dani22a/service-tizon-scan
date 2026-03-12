@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+.eggs
+dist
+build
+*.egg
+
+# Entorno virtual
+.venv
+venv
+env
+
+# Tests y cobertura
+tests
+.pytest_cache
+.coverage
+htmlcov
+
+# IDE y editor
+.idea
+.vscode
+*.swp
+*.swo
+
+# Variables de entorno (usar en runtime, no en build)
+.env
+.env.*
+!.env.example
+
+# Documentación
+*.md
+docs
+
+# Otros
+.DS_Store
+*.log
