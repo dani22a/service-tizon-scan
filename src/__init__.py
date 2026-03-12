@@ -23,9 +23,12 @@ def create_app() -> FastAPI:
   )
 
   cors_origins = [o.strip() for o in config.CORS_ORIGINS.split(",") if o.strip()]
+  # Regex para permitir subdominios de easypanel (ej: mantenimiento-tizon-app.znm1ue.easypanel.host)
+  cors_origin_regex = r"https?://[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.easypanel\.host"
   app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
+    allow_origin_regex=cors_origin_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
