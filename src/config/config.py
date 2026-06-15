@@ -6,6 +6,8 @@ class Config(BaseSettings):
   DEBUG: bool
   DOMAIN: str
   ENV: Literal["development", "production"]
+  # En producción usa migraciones (Aerich) y pon False para evitar DDL en cada arranque y en cada worker.
+  GENERATE_SCHEMAS: bool = True
   NAME_COOKIE: str
   CORS_ORIGINS: str = "http://localhost:3000"  # Orígenes separados por coma
   ROBOFLOW_API_URL: str = "https://serverless.roboflow.com"

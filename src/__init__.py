@@ -22,8 +22,19 @@ def create_app() -> FastAPI:
     debug=config.DEBUG,
   )
 
+  register_tortoise(
+    app,
+    config=tortoise_config,
+    generate_schemas=config.GENERATE_SCHEMAS,
+    add_exception_handlers=True
+  )
+
+  app.add_middleware(GZipMiddleware, minimum_size=1024)
+  app.add_middleware(JWTAuthMiddleware)
+
+  # CORS al final: en Starlette el último añadido es el primero en recibir la petición,
+  # así los headers CORS se aplican incluso en respuestas cortadas por JWT (401, etc.).
   cors_origins = [o.strip() for o in config.CORS_ORIGINS.split(",") if o.strip()]
-  # Regex para permitir subdominios de easypanel (ej: mantenimiento-tizon-app.znm1ue.easypanel.host)
   cors_origin_regex = r"https?://[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.easypanel\.host"
   app.add_middleware(
     CORSMiddleware,
@@ -35,17 +46,6 @@ def create_app() -> FastAPI:
     expose_headers=["*"],
     max_age=60 * 60 * 24,
   )
-  
-  register_tortoise(
-    app,
-    config=tortoise_config,
-    generate_schemas=True,
-    add_exception_handlers=True
-  )
-  
-  app.add_middleware(GZipMiddleware, minimum_size=1024)
-  
-  app.add_middleware(JWTAuthMiddleware)
 
   app.include_router(router, prefix="/api/v1")
 
