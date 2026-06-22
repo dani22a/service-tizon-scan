@@ -16,7 +16,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 # ============================================
-# Stage 2: Runtime - imagen final (bookworm completo para OpenCV/inference_sdk)
+# Stage 2: Runtime - imagen final
+# python:3.11-bookworm ya incluye libgomp1 y libs base para TensorFlow/Keras.
+# No se usa cv2 en el proyecto; inference-sdk aqui solo hace llamadas HTTP.
 # ============================================
 FROM python:3.11-bookworm AS runtime
 
@@ -30,16 +32,6 @@ RUN groupadd --gid 1000 appuser \
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=4000
-
-# Dependencias para OpenCV/cv2 (inference_sdk): libGL, libglib, etc.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgomp1 \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copiar paquetes Python desde builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
