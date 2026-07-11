@@ -1,6 +1,7 @@
-# Service Tizon Scan - Levantar con Docker
+# Service Tizon Scan - Levantar con Docker (DB externa)
 
-Guia completa para ejecutar el backend con Docker en Windows, Linux o macOS.
+Guia completa para ejecutar el backend con Docker en Windows, Linux o macOS,
+cuando tu PostgreSQL ya esta desplegado en otro sitio (fuera de Docker).
 
 ## 1) Instalar Docker
 
@@ -30,6 +31,7 @@ docker --version
 
 - Estar ubicado en `service-tizon-scan`
 - Tener un archivo `.env` en la raiz (si no existe, crealo)
+- Tu PostgreSQL debe ser accesible desde el contenedor (red/puerto/credenciales)
 
 Variables minimas recomendadas:
 
@@ -38,7 +40,8 @@ PORT=4000
 DEBUG=False
 ENV=production
 
-DB_HOST=postgres
+# Host/IP de TU PostgreSQL desplegado (desde el contenedor)
+DB_HOST=host.docker.internal
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
@@ -58,31 +61,10 @@ ROBOFLOW_TIMEOUT_SEC=15
 MAX_IMAGE_SIZE_MB=10
 ```
 
-Nota: `DB_HOST=postgres` es importante porque el backend y Postgres correran en la misma red de Docker.
+Nota: `DB_HOST` debe ser el hostname o IP reales de tu base desplegada.
+Si tu DB esta en otra maquina/servicio, usa ese host/IP y asegúrate de que el puerto (ej. `5432`) este abierto y accesible.
 
-## 3) Crear red Docker (una sola vez)
-
-```bash
-docker network create tizon-net
-```
-
-Si ya existe, Docker mostrara un mensaje y puedes continuar.
-
-## 4) Levantar PostgreSQL en Docker
-
-```bash
-docker run -d --name tizon-postgres ^
-  --network tizon-net ^
-  -e POSTGRES_USER=postgres ^
-  -e POSTGRES_PASSWORD=postgres ^
-  -e POSTGRES_DB=db_model_potato ^
-  -p 5432:5432 ^
-  postgres:16
-```
-
-En Linux/macOS usa `\` en vez de `^` para salto de linea.
-
-## 5) Construir imagen del backend
+## 3) Construir imagen del backend
 
 Desde la carpeta `service-tizon-scan`:
 
@@ -90,17 +72,27 @@ Desde la carpeta `service-tizon-scan`:
 docker build -t service-tizon-scan:local .
 ```
 
-## 6) Levantar backend en Docker
+## 4) Levantar backend en Docker
+
+### Windows (PowerShell)
 
 ```bash
-docker run -d --name service-tizon-scan ^
-  --network tizon-net ^
-  --env-file .env ^
-  -p 4000:4000 ^
+docker run -d --name service-tizon-scan `
+  -p 4000:4000 `
+  --env-file .env `
   service-tizon-scan:local
 ```
 
-## 7) Verificar que todo este arriba
+### Linux/macOS
+
+```bash
+docker run -d --name service-tizon-scan \
+  -p 4000:4000 \
+  --env-file .env \
+  service-tizon-scan:local
+```
+
+## 5) Verificar que todo este arriba
 
 ```bash
 docker ps
@@ -113,33 +105,30 @@ La API debe responder en:
 - `http://localhost:4000/docs`
 - `http://localhost:4000/redoc`
 
-## 8) Comandos utiles
+## 6) Comandos utiles
 
-Parar contenedores:
+Parar:
 
 ```bash
-docker stop service-tizon-scan tizon-postgres
+docker stop service-tizon-scan
 ```
 
-Iniciarlos de nuevo:
+Iniciar:
 
 ```bash
-docker start tizon-postgres service-tizon-scan
+docker start service-tizon-scan
 ```
 
 Eliminar y limpiar:
 
 ```bash
-docker rm -f service-tizon-scan tizon-postgres
-docker network rm tizon-net
+docker rm -f service-tizon-scan
 ```
 
-## 9) Problemas comunes
+## 7) Problemas comunes
 
 - Si falla la conexion a DB:
-  - confirma que `tizon-postgres` esta en ejecucion.
-  - valida que `.env` tenga `DB_HOST=postgres`.
+  - valida que `.env` tenga el `DB_HOST`/`DB_PORT` correctos para tu PostgreSQL desplegado.
+  - confirma que desde el contenedor se puede alcanzar el puerto de la DB (firewall, security group, DNS, etc.).
 - Si el puerto `4000` esta ocupado:
   - cambia el mapeo `-p 4001:4000` y accede por `http://localhost:4001`.
-- Si el puerto `5432` esta ocupado:
-  - cambia el mapeo `-p 5433:5432` (internamente la app sigue usando `5432` hacia `postgres`).

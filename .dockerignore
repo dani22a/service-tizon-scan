@@ -19,6 +19,12 @@ build
 venv
 env
 
+# Modelos ML locales (ya no se usan)
+model/
+
+# Documentos y backups
+*.docx
+
 # Tests y cobertura
 tests
 .pytest_cache

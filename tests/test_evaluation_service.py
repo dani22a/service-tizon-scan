@@ -43,7 +43,8 @@ async def test_create_prediccion_fase1_includes_periodo(monkeypatch):
     assert captured.get("surco_id") == 2
 
 
-def test_prediccion_to_dict_includes_periodo():
+@pytest.mark.asyncio
+async def test_prediccion_to_dict_includes_periodo():
     class P:
         def __init__(self):
             self.id = 9

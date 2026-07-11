@@ -43,15 +43,6 @@ def build_fase1_resumen(fase1_payload: dict) -> dict:
     }
 
 
-def build_fase2_resumen(full_payload: dict) -> dict:
-    efficient = full_payload.get("resultados", {}).get("efficient", {})
-    return {
-        "modelo": "efficient",
-        "clase_predicha": efficient.get("clase_predicha"),
-        "confianza": efficient.get("confianza"),
-    }
-
-
 def build_fase2_placeholder() -> dict:
     # Keep DB-compatible non-null JSON until phase 2 is completed.
     return {
@@ -140,30 +131,6 @@ async def list_predicciones_by_user(user_id: int) -> list[dict]:
     for p in predicciones:
         result.append(await prediccion_to_dict(p))
     return result
-
-
-async def update_prediccion_fase2(
-    user_id: int,
-    fase2_payload: dict,
-) -> Prediccion | None:
-    # Find the most recent prediction for this user
-    # that has fase1_payload but hasn't had fase2 classification results yet
-    prediccion = await (
-        Prediccion.filter(usuario_id=user_id, fase1_payload__isnull=False)
-        .order_by("-id")
-        .first()
-    )
-    if not prediccion:
-        return None
-
-    # Use placeholder if fase2_payload is None or empty
-    if not fase2_payload:
-        fase2_payload = build_fase2_payload_placeholder()
-
-    prediccion.fase2_resumen = build_fase2_resumen(fase2_payload)
-    prediccion.fase2_payload = fase2_payload
-    await prediccion.save()
-    return prediccion
 
 
 async def list_all_surcos_for_user(user_id: int) -> list[dict]:

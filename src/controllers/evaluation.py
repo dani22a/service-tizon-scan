@@ -1,5 +1,4 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request, Body
-from src.models.classifier import classifier
 from src.helpers.response import success_response
 from src.services.roboflow_service import (
   roboflow_inference_service,
@@ -8,7 +7,6 @@ from src.services.roboflow_service import (
 from src.services.evaluation_service import (
   save_image_locally,
   create_prediccion_fase1,
-  update_prediccion_fase2,
   list_predicciones_by_user,
   list_all_surcos_for_user,
   create_diagnosis_report_with_recommendations,
@@ -67,41 +65,6 @@ async def evaluate_roboflow(
     message,
     status_code=200,
   )
-
-
-@router.post("/evaluate", status_code=200)
-async def evaluate(
-  request: Request,
-  file: UploadFile = File(...),
-  periodo_id: int | None = Form(None),
-):
-  if not file.content_type or not file.content_type.startswith("image/"):
-    raise HTTPException(status_code=400, detail="Invalid image format")
-
-  user_id = _get_user_id(request)
-
-  if classifier is None:
-    raise HTTPException(
-      status_code=503,
-      detail="Modelos de clasificación no disponibles. Configure la carpeta model/ con los archivos .keras.",
-    )
-
-  img_bytes = await file.read()
-  result = classifier.predict_all_models_bytes(img_bytes)
-
-  prediccion = await update_prediccion_fase2(user_id=user_id, fase2_payload=result)
-  if prediccion and periodo_id is not None:
-      # in case we want to update periodo on phase2, set and save
-      prediccion.periodo_id = periodo_id
-      await prediccion.save()
-
-  response_data = {
-    "clasificacion": result,
-  }
-  if prediccion:
-    response_data["prediccion"] = await prediccion_to_dict(prediccion)
-
-  return success_response(response_data, "Evaluation successful", status_code=200)
 
 
 @router.get("/surcos", status_code=200)

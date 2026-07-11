@@ -9,8 +9,11 @@ from src.models.modulo import Modulo
 from src.models.prediccion import Prediccion
 from src.models.surco import Surco
 from src.models.user import User
-from src.models.classifier import classifier
 from src.services.roboflow_service import roboflow_inference_service
+from src.services.evaluation_service import (
+    build_fase2_payload_placeholder,
+    build_fase2_placeholder,
+)
 
 
 def _iso(value: Any) -> str | None:
@@ -30,14 +33,6 @@ def _build_fase1_resumen(fase1_payload: dict[str, Any]) -> dict[str, Any]:
         "total_detecciones": len(predictions),
         "clases_detectadas": clases_detectadas,
     }
-
-
-def _build_fase2_resumen(fase2_payload: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "clase_predicha": fase2_payload.get("clase_predicha"),
-        "confianza": fase2_payload.get("confianza"),
-    }
-
 
 def _modulo_to_dict(modulo: Modulo) -> dict[str, Any]:
     return {
@@ -204,19 +199,11 @@ async def evaluar_y_guardar_prediccion(
 
     fase1_payload = await roboflow_inference_service(image_bytes=image_bytes, image_url=image_url)
 
-    if image_bytes:
-        if classifier is None:
-            raise HTTPException(
-                status_code=503,
-                detail="Modelos de clasificación no disponibles. Configure la carpeta model/ con los archivos .keras.",
-            )
-        fase2_payload = classifier.predict_bytes(image_bytes)
-        resolved_image_url = f"uploaded://{filename or 'image'}"
-    else:
-        raise HTTPException(status_code=400, detail="Fase 2 requires image file upload")
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Se requiere un archivo de imagen")
 
+    resolved_image_url = f"uploaded://{filename or 'image'}"
     fase1_resumen = _build_fase1_resumen(fase1_payload)
-    fase2_resumen = _build_fase2_resumen(fase2_payload)
 
     prediccion = await Prediccion.create(
         surco=surco,
@@ -224,8 +211,8 @@ async def evaluar_y_guardar_prediccion(
         imagen_url=resolved_image_url,
         fase1_resumen=fase1_resumen,
         fase1_payload=fase1_payload,
-        fase2_resumen=fase2_resumen,
-        fase2_payload=fase2_payload,
+        fase2_resumen=build_fase2_placeholder(),
+        fase2_payload=build_fase2_payload_placeholder(),
     )
 
     return _prediccion_to_dict(prediccion)

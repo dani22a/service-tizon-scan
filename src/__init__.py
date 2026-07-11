@@ -9,10 +9,6 @@ from src.controllers import router
 from tortoise.contrib.fastapi import register_tortoise
 from src.config.tortoise import tortoise_config
 from src.middleware.auth import JWTAuthMiddleware
-import os
-
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-
 config = get_config()
 
 def create_app() -> FastAPI:
